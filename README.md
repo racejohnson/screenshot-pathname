@@ -39,3 +39,12 @@ A png, jpg, jpeg, heic, heif, tiff, tif or gif file created directly in the fold
 | Notify on Copy | Off (asks for notification permission when turned on) |
 | Open at Login | Off |
 | Folder | macOS screenshot location |
+
+## Troubleshooting
+
+**Notifications show a blank or old icon after the app icon changes.** macOS keeps a stale copy in its system icon cache. Clear it, then restart Notification Center:
+
+```sh
+sudo rm -rf /Library/Caches/com.apple.iconservices.store
+killall NotificationCenter
+```
