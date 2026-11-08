@@ -1,37 +1,27 @@
 #!/bin/zsh
-# Builds the app, replaces "/Applications/Screenshot Pathname.app" and relaunches it.
+# Builds the release app, installs it as "/Applications/Screenshot Pathname.app"
+# (replacing any older copy), and opens it.
 set -euo pipefail
 
 ROOT="${0:A:h:h}"
-BUNDLE_ID="com.racejohnson.ScreenshotPathname"
-NAME="Screenshot Pathname.app"
-TARGET="/Applications/$NAME"
+APP_NAME="Screenshot Pathname"
+BUILT="$ROOT/build/$APP_NAME.app"
+INSTALLED="/Applications/$APP_NAME.app"
 LEGACY="/Applications/ScreenshotPathname.app"   # the name before 2.0
 
 "$ROOT/scripts/build-app.sh"
 
-wait_for_exit() {
-  for _ in {1..$1}; do
-    pgrep -x ScreenshotPathname >/dev/null || return 0
-    sleep 0.1
-  done
-}
-
 if pgrep -x ScreenshotPathname >/dev/null; then
-  echo "Quitting the running app…"
-  osascript -e "quit app id \"$BUNDLE_ID\"" >/dev/null 2>&1 || true
-  wait_for_exit 50
-  pkill -x ScreenshotPathname 2>/dev/null && wait_for_exit 20
-  pkill -9 -x ScreenshotPathname 2>/dev/null && wait_for_exit 20
+  osascript -e 'quit app id "com.racejohnson.ScreenshotPathname"' >/dev/null 2>&1 || true
+  for _ in {1..50}; do pgrep -x ScreenshotPathname >/dev/null || break; sleep 0.1; done
+  pkill -x ScreenshotPathname && sleep 0.5 || true
 fi
 
-echo "Installing to $TARGET…"
-# Copy first, then swap, so a failed copy leaves the old app in place. The copy keeps its
-# .app name throughout: a bundle that appears under any other name is remembered as a folder.
-STAGE="$(mktemp -d)"
-trap 'rm -rf "$STAGE"' EXIT
-ditto "$ROOT/build/$NAME" "$STAGE/$NAME"
-rm -rf "$TARGET" "$LEGACY"
-mv "$STAGE/$NAME" "$TARGET"
-open "$TARGET"
-echo "Installed and launched $TARGET"
+echo "==> Installing"
+rm -rf "$INSTALLED" "$LEGACY"
+# Move rather than copy, so Spotlight and Launch Services only ever see one copy, and only
+# ever under its .app name (a bundle first seen under another name is remembered as a folder).
+mv "$BUILT" "$INSTALLED"
+
+open "$INSTALLED"
+echo "==> Installed and opened $INSTALLED"

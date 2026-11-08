@@ -8,8 +8,9 @@ Screenshot Pathname is a macOS menu bar app (Swift 6, macOS 14+) that copies the
 
 - **Build**: `swift build`
 - **Test**: `swift test` (single suite: `swift test --filter ScreenshotTests`)
-- **Build app**: `scripts/build-app.sh` → `build/Screenshot Pathname.app`
-- **Install**: `scripts/install.sh` (builds, replaces `/Applications/Screenshot Pathname.app`, relaunches)
+- **Build app**: `scripts/build-app.sh` → `build/Screenshot Pathname.app` (universal release; `--debug` for a native debug build). Signs with the first Developer ID or Apple Development identity in the keychain, else ad-hoc; `SIGN_IDENTITY` overrides. It also records the real SDK version so macOS doesn't run the app in compatibility mode.
+- **Install**: `scripts/install.sh` (builds, moves the bundle to `/Applications/Screenshot Pathname.app`, relaunches)
+- **README images**: `docs/` (icon, menu screenshot, menu bar states). Retake them when the icon or menu changes.
 - **Icon preview**: `scripts/icon-preview.sh` (renders `AppIcon.icon` in every appearance and at Finder sizes into `build/icon-preview/`)
 
 Don't launch a second copy while the installed app runs: both would copy paths.
