@@ -1,0 +1,101 @@
+{
+  "fill": {
+    "linear-gradient": [
+      "display-p3:0.12,0.14,0.40,1.0",
+      "display-p3:0.02,0.03,0.09,1.0"
+    ],
+    "orientation": {
+      "start": {
+        "x": 0.5,
+        "y": 0
+      },
+      "stop": {
+        "x": 0.5,
+        "y": 1
+      }
+    }
+  },
+  "groups": [
+    {
+      "name": "Glyph",
+      "layers": [
+        {
+          "name": "Slash",
+          "image-name": "slash.svg"
+        },
+        {
+          "name": "Corners",
+          "image-name": "corners.svg"
+        }
+      ],
+      "position": {
+        "scale": 1,
+        "translation-in-points": [
+          0,
+          -12
+        ]
+      },
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.2
+      },
+      "specular": false,
+      "translucency": {
+        "enabled": false,
+        "value": 0
+      }
+    },
+    {
+      "name": "Atmosphere",
+      "layers": [
+        {
+          "name": "Glow",
+          "image-name": "glow.svg",
+          "glass": false,
+          "opacity-specializations": [
+            {
+              "value": 1
+            },
+            {
+              "appearance": "tinted",
+              "value": 0
+            }
+          ]
+        },
+        {
+          "name": "Depth",
+          "image-name": "depth.svg",
+          "glass": false,
+          "opacity-specializations": [
+            {
+              "value": 1
+            },
+            {
+              "appearance": "dark",
+              "value": 0.35
+            },
+            {
+              "appearance": "tinted",
+              "value": 0
+            }
+          ]
+        }
+      ],
+      "lighting": "individual",
+      "shadow": {
+        "kind": "none",
+        "opacity": 0
+      },
+      "specular": false,
+      "translucency": {
+        "enabled": false,
+        "value": 0
+      }
+    }
+  ],
+  "supported-platforms": {
+    "squares": [
+      "macOS"
+    ]
+  }
+}

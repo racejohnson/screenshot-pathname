@@ -1,74 +1,41 @@
-# ScreenshotPathname
+# Screenshot Pathname
 
-Menu bar app for macOS 13+ that watches a screenshots folder and copies the newest screenshot path to the clipboard.
+A macOS menu bar app that copies the full path of every new screenshot to the clipboard, ready to paste into Claude Code, Codex or a terminal.
 
-## Features
+Take a screenshot, wait a moment for the menu bar icon to flash a checkmark, paste the path.
 
-- Menu bar only app (`LSUIElement`)
-- Toggle `Enable Auto Copy Path` (persisted)
-- Watches folder for new image files (`.png`, `.jpg`, `.jpeg`, `.heic`)
-- Debounced event handling to avoid duplicate fires
-- Copies full POSIX path to clipboard
-- Optional local notification (`AppConfig.shouldNotifyOnCopy`)
-- `Open Screenshots Folder` menu action
-- `Start at Login` toggle using `SMAppService.mainApp`
-- Missing-folder fallback with `Choose Folder…` and security-scoped bookmark persistence
+## Install
 
-## Run Without Xcode (recommended for your setup)
-
-From `/Users/racejohnson/Codex/screenshot-pathname`:
-
-```bash
-./scripts/build_app.sh
-./scripts/run_app.sh
+```sh
+scripts/install.sh
 ```
 
-This builds `build/ScreenshotPathname.app` using `swiftc` from Command Line Tools and launches it.
+Builds the app, replaces `/Applications/ScreenshotPathname.app` and relaunches it. Requires macOS 14 or later and Xcode (for `actool`).
 
-## Optional: Install to Applications
+## Build and test
 
-```bash
-pkill -x ScreenshotPathname || true
-rm -rf /Applications/ScreenshotPathname.app
-cp -R "/Users/racejohnson/Codex/screenshot-pathname/build/ScreenshotPathname.app" /Applications/
-open /Applications/ScreenshotPathname.app
+```sh
+swift build                # debug build
+swift test                 # unit tests and a live FSEvents test
+scripts/build-app.sh       # build/ScreenshotPathname.app, ad-hoc signed
+scripts/icon-preview.sh    # render Resources/AppIcon.icon into build/icon-preview/
 ```
 
-For `Start at Login`, running from `/Applications` is more reliable.
+## Which folder it watches
 
-## Build With Xcode (if installed later)
+By default it follows the macOS screenshot location, the one set in Cmd-Shift-5 › Options (`defaults read com.apple.screencapture location`), and falls back to `~/Desktop` when none is set, as macOS does. A change there is picked up within a few seconds. Point CleanShot X at the same folder and both tools are covered.
 
-1. Open `/Users/racejohnson/Codex/screenshot-pathname/ScreenshotPathname.xcodeproj` in Xcode 15+.
-2. In target settings, set your signing team and bundle identifier if needed.
-3. Build and run the `ScreenshotPathname` scheme.
+**Folder › Choose Folder…** watches a folder of your own instead; **Use macOS Screenshot Location** switches back. A folder that disappears (an unplugged drive) shows as unavailable and is watched again when it returns.
 
-Optional CLI build from full Xcode:
+## What counts as a new screenshot
 
-```bash
-xcodebuild -project "/Users/racejohnson/Codex/screenshot-pathname/ScreenshotPathname.xcodeproj" -scheme ScreenshotPathname -configuration Debug build
-```
-
-## Entitlements
-
-- Default project is unsandboxed and does not require additional entitlements.
-- Local notifications only require runtime user permission.
-- If you later sandbox the app, add:
-  - `com.apple.security.app-sandbox = true`
-  - `com.apple.security.files.user-selected.read-only = true`
+A png, jpg, jpeg, heic, heif, tiff, tif or gif file created directly in the folder within the last 30 seconds. Hidden temp files, subfolders, screen recordings and old files moved into the folder are ignored.
 
 ## Defaults
 
-- Default folder: `/Users/racejohnson/Screenshots`
-- Debounce interval: `0.5` seconds
-- Auto-copy default: enabled
-- Start at login default: disabled
-- Copy notification default: enabled
-
-## Notification Prompt Troubleshooting
-
-- macOS shows the notification permission prompt only once per app bundle identifier.
-- If you do not see the prompt again, reset it and relaunch:
-
-```bash
-tccutil reset Notifications com.racejohnson.ScreenshotPathname
-```
+| Setting | Default |
+| --- | --- |
+| Copy New Screenshot Paths | On |
+| Notify on Copy | Off (asks for notification permission when turned on) |
+| Open at Login | Off |
+| Folder | macOS screenshot location |

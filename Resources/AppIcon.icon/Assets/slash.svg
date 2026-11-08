@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <!-- The path separator: a 60° solidus whose caps sit on the corners' rails (y 262 and 762).
+       Bone at the base turns to aqua at the tip: the screenshot becomes a path. -->
+  <defs>
+    <linearGradient id="bone-to-aqua" gradientUnits="userSpaceOnUse" x1="368" y1="762" x2="656" y2="262">
+      <stop offset="0" stop-color="#F4F2EC"/>
+      <stop offset="0.6" stop-color="#86E9FF"/>
+    </linearGradient>
+  </defs>
+  <path d="M368 762 L656 262" stroke="url(#bone-to-aqua)" stroke-width="80" stroke-linecap="round"/>
+</svg>

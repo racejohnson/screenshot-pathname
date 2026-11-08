@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <!-- Off-axis atmosphere: teal at the top left, violet at the bottom right. -->
+  <defs>
+    <radialGradient id="teal" gradientUnits="userSpaceOnUse" cx="200" cy="150" r="620">
+      <stop offset="0" stop-color="#3FD9C0" stop-opacity="0.30"/>
+      <stop offset="1" stop-color="#3FD9C0" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="violet" gradientUnits="userSpaceOnUse" cx="860" cy="900" r="560">
+      <stop offset="0" stop-color="#8A5CF0" stop-opacity="0.24"/>
+      <stop offset="1" stop-color="#8A5CF0" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1024" height="1024" fill="url(#teal)"/>
+  <rect width="1024" height="1024" fill="url(#violet)"/>
+</svg>

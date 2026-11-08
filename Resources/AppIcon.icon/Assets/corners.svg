@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <!-- Two viewfinder corners on one diagonal. Stroke 80, centreline radius 60. -->
+  <g fill="none" stroke="#F4F2EC" stroke-width="80" stroke-linecap="round">
+    <path d="M262 427 V322 A60 60 0 0 1 322 262 H427"/>
+    <path d="M762 597 V702 A60 60 0 0 1 702 762 H597"/>
+  </g>
+</svg>
