@@ -39,15 +39,15 @@ final class AppModel {
         static let autoCopy = "autoCopyEnabled"
         static let notifyOnCopy = "notifyOnCopy"
         static let customFolderPath = "customFolderPath"
+        static let openAtLogin = "openAtLogin"
     }
 
     init() {
         defaults.register(defaults: [Keys.autoCopy: true, Keys.notifyOnCopy: false])
-        // Left over from version 1: login state now comes from SMAppService, and the folder
-        // is a plain path because the app is not sandboxed. A re-signed build can lose the
-        // login item, so carry version 1's choice over once.
-        if defaults.bool(forKey: "startAtLoginEnabled"), SMAppService.mainApp.status != .enabled {
-            try? SMAppService.mainApp.register()
+        // Left over from version 1: its login choice moves to the new key, and the folder is
+        // now a plain path because the app is not sandboxed.
+        if let legacy = defaults.object(forKey: "startAtLoginEnabled") as? Bool {
+            defaults.set(legacy, forKey: Keys.openAtLogin)
         }
         defaults.removeObject(forKey: "startAtLoginEnabled")
         defaults.removeObject(forKey: "selectedFolderBookmarkData")
@@ -58,6 +58,7 @@ final class AppModel {
         customFolderPath = custom
         folder = ScreenshotFolder.current(custom: custom)
 
+        restoreLoginItem()
         refresh()
         Task { await pollForChanges() }
     }
@@ -98,7 +99,10 @@ final class AppModel {
     }
 
     private func refresh() {
-        opensAtLogin = SMAppService.mainApp.status == .enabled
+        let loginEnabled = SMAppService.mainApp.status == .enabled
+        // Turned off in System Settings while running: that is the user's choice now.
+        if opensAtLogin, !loginEnabled { defaults.set(false, forKey: Keys.openAtLogin) }
+        opensAtLogin = loginEnabled
         forgetLatestIfDeleted()
 
         let resolved = ScreenshotFolder.current(custom: customFolderPath)
@@ -190,7 +194,22 @@ final class AppModel {
 
     // MARK: Login item
 
+    /// macOS can drop the login item when the app is rebuilt (a new ad-hoc signature) or
+    /// moved, so the user's choice lives in defaults and is restored at launch. A login item
+    /// turned off in System Settings is not restored: that is recorded by `refresh()`.
+    private func restoreLoginItem() {
+        let service = SMAppService.mainApp
+        guard defaults.bool(forKey: Keys.openAtLogin), service.status == .notRegistered else { return }
+        do {
+            try service.register()
+            log.info("Restored Open at Login")
+        } catch {
+            log.error("Restoring Open at Login failed: \(error.localizedDescription, privacy: .public)")
+        }
+    }
+
     func setOpensAtLogin(_ enabled: Bool) {
+        defaults.set(enabled, forKey: Keys.openAtLogin)
         let service = SMAppService.mainApp
         do {
             if enabled {

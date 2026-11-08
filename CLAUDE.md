@@ -8,8 +8,8 @@ Screenshot Pathname is a macOS menu bar app (Swift 6, macOS 14+) that copies the
 
 - **Build**: `swift build`
 - **Test**: `swift test` (single suite: `swift test --filter ScreenshotTests`)
-- **Build app**: `scripts/build-app.sh` → `build/ScreenshotPathname.app`
-- **Install**: `scripts/install.sh` (builds, replaces `/Applications/ScreenshotPathname.app`, relaunches)
+- **Build app**: `scripts/build-app.sh` → `build/Screenshot Pathname.app`
+- **Install**: `scripts/install.sh` (builds, replaces `/Applications/Screenshot Pathname.app`, relaunches)
 - **Icon preview**: `scripts/icon-preview.sh` (renders `AppIcon.icon` in every appearance and at Finder sizes into `build/icon-preview/`)
 
 Don't launch a second copy while the installed app runs: both would copy paths.
@@ -37,4 +37,4 @@ The model re-resolves the folder every 5 s and restarts the watcher only when th
 - Keep decisions in pure functions (`ScreenshotFolder.resolve`, `Screenshot.isNew`) and test them with Swift Testing.
 - Log with `os.Logger` (subsystem = bundle ID), never `print`. No force unwraps.
 - Comments only where a reader needs the why.
-- UserDefaults keys: `autoCopyEnabled`, `notifyOnCopy`, `customFolderPath`.
+- UserDefaults keys: `autoCopyEnabled`, `notifyOnCopy`, `customFolderPath`, `openAtLogin` (the login choice, restored at launch if macOS drops the registration after a rebuild or move).

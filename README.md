@@ -10,14 +10,14 @@ Take a screenshot, wait a moment for the menu bar icon to flash a checkmark, pas
 scripts/install.sh
 ```
 
-Builds the app, replaces `/Applications/ScreenshotPathname.app` and relaunches it. Requires macOS 14 or later and Xcode (for `actool`).
+Builds the app, replaces `/Applications/Screenshot Pathname.app` and relaunches it. Requires macOS 14 or later and Xcode (for `actool`).
 
 ## Build and test
 
 ```sh
 swift build                # debug build
 swift test                 # unit tests and a live FSEvents test
-scripts/build-app.sh       # build/ScreenshotPathname.app, ad-hoc signed
+scripts/build-app.sh       # "build/Screenshot Pathname.app", ad-hoc signed
 scripts/icon-preview.sh    # render Resources/AppIcon.icon into build/icon-preview/
 ```
 

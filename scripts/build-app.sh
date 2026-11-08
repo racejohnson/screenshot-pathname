@@ -1,9 +1,9 @@
 #!/bin/zsh
-# Builds build/ScreenshotPathname.app: release binary, Info.plist, compiled icon assets, ad-hoc signature.
+# Builds "build/Screenshot Pathname.app": release binary, Info.plist, compiled icon assets, ad-hoc signature.
 set -euo pipefail
 
 ROOT="${0:A:h:h}"
-APP="$ROOT/build/ScreenshotPathname.app"
+APP="$ROOT/build/Screenshot Pathname.app"
 CONTENTS="$APP/Contents"
 
 echo "Building release binary…"

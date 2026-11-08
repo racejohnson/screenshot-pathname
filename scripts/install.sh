@@ -1,10 +1,12 @@
 #!/bin/zsh
-# Builds the app, replaces /Applications/ScreenshotPathname.app and relaunches it.
+# Builds the app, replaces "/Applications/Screenshot Pathname.app" and relaunches it.
 set -euo pipefail
 
 ROOT="${0:A:h:h}"
 BUNDLE_ID="com.racejohnson.ScreenshotPathname"
-TARGET="/Applications/ScreenshotPathname.app"
+NAME="Screenshot Pathname.app"
+TARGET="/Applications/$NAME"
+LEGACY="/Applications/ScreenshotPathname.app"   # the name before 2.0
 
 "$ROOT/scripts/build-app.sh"
 
@@ -24,10 +26,12 @@ if pgrep -x ScreenshotPathname >/dev/null; then
 fi
 
 echo "Installing to $TARGET…"
-# Copy first, then swap, so a failed copy leaves the old app in place.
-rm -rf "$TARGET.new"
-ditto "$ROOT/build/ScreenshotPathname.app" "$TARGET.new"
-rm -rf "$TARGET"
-mv "$TARGET.new" "$TARGET"
+# Copy first, then swap, so a failed copy leaves the old app in place. The copy keeps its
+# .app name throughout: a bundle that appears under any other name is remembered as a folder.
+STAGE="$(mktemp -d)"
+trap 'rm -rf "$STAGE"' EXIT
+ditto "$ROOT/build/$NAME" "$STAGE/$NAME"
+rm -rf "$TARGET" "$LEGACY"
+mv "$STAGE/$NAME" "$TARGET"
 open "$TARGET"
 echo "Installed and launched $TARGET"
