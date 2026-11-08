@@ -13,9 +13,12 @@ enum Screenshot {
         !name.hasPrefix(".") && extensions.contains((name as NSString).pathExtension.lowercased())
     }
 
-    /// Whether an FSEvents event announces a new screenshot in `folder`.
+    /// Whether an FSEvents event points at a new screenshot in `folder`.
+    /// The kind of event is not trusted: tools save by creating, renaming or cloning, and
+    /// CleanShot's clone reports a first event without the Created flag. The file itself
+    /// decides; the watcher skips paths it has already handled.
     /// - Parameter created: the file's creation date now, or nil when the path no longer
-    ///   exists (the old name in a rename reports an event too).
+    ///   exists (removals and the old name in a rename report events too).
     static func isNew(
         path: String,
         flags: FSEventStreamEventFlags,
@@ -23,11 +26,8 @@ enum Screenshot {
         created: Date?,
         now: Date
     ) -> Bool {
-        let appeared = FSEventStreamEventFlags(
-            kFSEventStreamEventFlagItemCreated | kFSEventStreamEventFlagItemRenamed
-        )
         let isFile = FSEventStreamEventFlags(kFSEventStreamEventFlagItemIsFile)
-        guard flags & appeared != 0, flags & isFile != 0, let created else { return false }
+        guard flags & isFile != 0, let created else { return false }
 
         let url = URL(fileURLWithPath: path)
         // FSEvents is recursive; only direct children count.

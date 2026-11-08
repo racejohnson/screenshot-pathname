@@ -62,9 +62,10 @@ import Testing
         #expect(isNew("photo.HeIc"))
     }
 
-    @Test func requiresCreateOrRenameOfAFile() {
-        #expect(!isNew("Screenshot.png", flags: FSEventStreamEventFlags(
-            kFSEventStreamEventFlagItemModified | kFSEventStreamEventFlagItemIsFile)))
+    @Test func acceptsAnyEventForAFile() {
+        // CleanShot's clone: the first event has no Created flag.
+        #expect(isNew("CleanShot-2026-11-08-143030.png", flags: FSEventStreamEventFlags(
+            kFSEventStreamEventFlagItemCloned | kFSEventStreamEventFlagItemIsFile)))
         #expect(!isNew("Screenshot.png", flags: FSEventStreamEventFlags(
             kFSEventStreamEventFlagItemCreated | kFSEventStreamEventFlagItemIsDir)))
     }

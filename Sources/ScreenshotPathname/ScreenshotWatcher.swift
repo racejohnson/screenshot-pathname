@@ -22,8 +22,9 @@ private final class Watch: @unchecked Sendable {
     private let continuation: AsyncStream<URL>.Continuation
     private let queue = DispatchQueue(label: "com.racejohnson.ScreenshotPathname.watcher")
     private var stream: FSEventStreamRef?
-    /// Paths already in the folder or already handled. A file saved over in place (an atomic
-    /// write looks like a fresh create) and the several events one capture reports stay quiet.
+    /// Paths in the folder when watching started, plus every path reported since. A file saved
+    /// over in place (an atomic write looks like a fresh create) and the several events one
+    /// capture produces stay quiet.
     private var seen: Set<String> = []
 
     init(folder: URL, continuation: AsyncStream<URL>.Continuation) {
@@ -102,11 +103,12 @@ private final class Watch: @unchecked Sendable {
     }
 
     private func handle(path: String, flags: FSEventStreamEventFlags) {
+        let created = (try? FileManager.default.attributesOfItem(atPath: path))?[.creationDate] as? Date
         guard !seen.contains(path),
-              let created = (try? FileManager.default.attributesOfItem(atPath: path))?[.creationDate] as? Date
+              Screenshot.isNew(path: path, flags: flags, in: folder, created: created, now: Date())
         else { return }
+        // Remember only reported paths, so an event that doesn't qualify can't hide a later one.
         seen.insert(path)
-        guard Screenshot.isNew(path: path, flags: flags, in: folder, created: created, now: Date()) else { return }
         continuation.yield(URL(fileURLWithPath: path))
     }
 }
