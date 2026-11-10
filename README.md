@@ -64,6 +64,9 @@ An image (PNG, JPEG, HEIC, TIFF or GIF) that appears directly in the folder. Scr
 **The path doesn't work when I paste it into a shell command.**
 macOS screenshot names contain spaces, so put quotes around the path: `open "/Users/you/Desktop/Screenshot 2026-11-08 at 3.24.21 PM.png"`. AI tools like Claude Code take the path as it is.
 
+**Notifications don't appear.**
+Open System Settings > Notifications > Screenshot Pathname and turn on **Allow notifications**. If the app isn't listed there, quit and reopen it with **Notify on Copy** checked, and choose **Allow** when macOS asks.
+
 **Notifications show a blank icon.**
 macOS can hold on to an old copy of the app's icon. Clear its icon cache in Terminal, then try again:
 

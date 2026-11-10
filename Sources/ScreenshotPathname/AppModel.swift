@@ -16,7 +16,7 @@ final class AppModel {
     var notifyOnCopy: Bool {
         didSet {
             defaults.set(notifyOnCopy, forKey: Keys.notifyOnCopy)
-            if notifyOnCopy, !oldValue { Task { await requestNotifications() } }
+            if notifyOnCopy, !oldValue { Task { await checkNotificationPermission(userTurnedOn: true) } }
         }
     }
 
@@ -34,6 +34,7 @@ final class AppModel {
     @ObservationIgnored private var watchTask: Task<Void, Never>?
     @ObservationIgnored private var copyTask: Task<Void, Never>?
     @ObservationIgnored private var feedbackTask: Task<Void, Never>?
+    @ObservationIgnored private let notificationPresenter = NotificationPresenter()
 
     private enum Keys {
         static let autoCopy = "autoCopyEnabled"
@@ -57,6 +58,11 @@ final class AppModel {
         let custom = defaults.string(forKey: Keys.customFolderPath)
         customFolderPath = custom
         folder = ScreenshotFolder.current(custom: custom)
+
+        UNUserNotificationCenter.current().delegate = notificationPresenter
+        // The permission can be undecided even with the toggle on (it was turned on under an
+        // older signature, or reset in System Settings), and macOS then hides every notification.
+        if notifyOnCopy { Task { await checkNotificationPermission(userTurnedOn: false) } }
 
         restoreLoginItem()
         refresh()
@@ -171,16 +177,27 @@ final class AppModel {
 
     // MARK: Notifications
 
-    private func requestNotifications() async {
+    /// Asks while the permission is undecided. A denial turns the toggle off; when the user
+    /// just turned it on, open System Settings too, because macOS will not ask a second time.
+    private func checkNotificationPermission(userTurnedOn: Bool) async {
         let center = UNUserNotificationCenter.current()
-        if await center.notificationSettings().authorizationStatus == .denied {
-            // Denied earlier, so the system will not ask again: send the user to Settings instead.
+        switch await center.notificationSettings().authorizationStatus {
+        case .notDetermined:
+            do {
+                if try await center.requestAuthorization(options: [.alert]) { return }
+            } catch {
+                log.error("Notification permission request failed: \(error.localizedDescription, privacy: .public)")
+            }
             notifyOnCopy = false
-            if let url = URL(string: "x-apple.systempreferences:com.apple.Notifications-Settings.extension") {
+        case .denied:
+            log.notice("Notifications are turned off in System Settings")
+            notifyOnCopy = false
+            if userTurnedOn,
+               let url = URL(string: "x-apple.systempreferences:com.apple.Notifications-Settings.extension") {
                 NSWorkspace.shared.open(url)
             }
-        } else if (try? await center.requestAuthorization(options: [.alert])) != true {
-            notifyOnCopy = false
+        default:
+            break
         }
     }
 
@@ -189,7 +206,13 @@ final class AppModel {
         content.title = "Screenshot path copied"
         content.body = url.lastPathComponent
         let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
-        UNUserNotificationCenter.current().add(request)
+        Task {
+            do {
+                try await UNUserNotificationCenter.current().add(request)
+            } catch {
+                log.error("Posting notification failed: \(error.localizedDescription, privacy: .public)")
+            }
+        }
     }
 
     // MARK: Login item
@@ -224,5 +247,16 @@ final class AppModel {
             SMAppService.openSystemSettingsLoginItems()
         }
         opensAtLogin = service.status == .enabled
+    }
+}
+
+/// macOS hides notifications from the active app unless asked to show them, and this app
+/// becomes active while its folder panel is open.
+private final class NotificationPresenter: NSObject, UNUserNotificationCenterDelegate {
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        willPresent notification: UNNotification
+    ) async -> UNNotificationPresentationOptions {
+        [.banner, .list]
     }
 }
