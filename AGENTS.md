@@ -1,4 +1,4 @@
-# CLAUDE.md
+# Screenshot Pathname
 
 ## Project Overview
 
